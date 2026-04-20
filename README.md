@@ -21,7 +21,7 @@ WanderLust is a full-stack travel listing and review platform. Users can post pr
 ---
 
 ## Visit Website
-[https://wanderlust-qgxn.onrender.com/listings](https://wanderlust-qgxn.onrender.com/listings)
+[https://triptales-qxe8.onrender.com/listings](https://triptales-qxe8.onrender.com/listings)
 
 ---
 

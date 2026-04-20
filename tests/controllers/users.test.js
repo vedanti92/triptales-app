@@ -69,7 +69,7 @@ describe("userController.signup", () => {
 
     expect(User.register).toHaveBeenCalled();
     expect(req.login).toHaveBeenCalled();
-    expect(req.flash).toHaveBeenCalledWith("success", "Welcome to WanderLust!");
+    expect(req.flash).toHaveBeenCalledWith("success", "Welcome to TripTales!");
     expect(res.redirect).toHaveBeenCalledWith("/listings");
   });
 
@@ -105,7 +105,7 @@ describe("userController.login", () => {
 
     await userController.login(req, res);
 
-    expect(req.flash).toHaveBeenCalledWith("success", "Welcome to WanderLust!");
+    expect(req.flash).toHaveBeenCalledWith("success", "Welcome to TripTales!");
     expect(res.redirect).toHaveBeenCalledWith("/listings");
   });
 

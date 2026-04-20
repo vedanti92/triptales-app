@@ -1,5 +1,5 @@
-# WanderLust – Travel Listing & Review Platform
-WanderLust is a full-stack travel listing and review platform. Users can post property listings, write reviews, and explore locations on a dynamic map. Server-side rendering with EJS ensures fast, interactive pages.
+# TripTales – Travel Listing & Review Platform
+TripTales is a full-stack travel listing and review platform. Users can post property listings, write reviews, and explore locations on a dynamic map. Server-side rendering with EJS ensures fast, interactive pages.
 
 ---
 
@@ -26,5 +26,5 @@ WanderLust is a full-stack travel listing and review platform. Users can post pr
 ---
 
 ## 📸 Screenshots
-<img width="500" alt="image" src="https://github.com/user-attachments/assets/e5959f1b-ad00-4e54-a802-df4fbb3666d2" />
-<img width="500" alt="image" src="https://github.com/user-attachments/assets/3ec461e1-03d9-4bf2-8016-a5d33d2a591a" />
+<img width="500" alt="image" src="https://github.com/user-attachments/assets/59b786e1-4b67-427c-bb10-659a03c3252f" />
+<img width="500" alt="image" src="https://github.com/user-attachments/assets/6f603bee-6be4-45e5-900c-be3b439af281" />

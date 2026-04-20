@@ -25,6 +25,9 @@ const dbUrl = process.env.ATLASDB_URL;
 main()
   .then(() => {
     console.log("connected to DB");
+    app.listen(8080, () => {
+      console.log("server is listening to port 8080");
+    });
   })
   .catch((err) => {
     console.log(err);
@@ -78,7 +81,7 @@ passport.deserializeUser(User.deserializeUser());
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
-  res.locals.currUser = req.user;
+  res.locals.currUser = req.user || null;
   next();
 });
 
@@ -122,8 +125,4 @@ app.use((err, req, res, next) => {
   let { statusCode = 500, message = "Something went wrong!" } = err;
   res.status(statusCode).render("error.ejs", { message });
   // res.status(statusCode).send(message);
-});
-
-app.listen(8080, () => {
-  console.log("server is listening to port 8080");
 });

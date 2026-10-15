@@ -3,7 +3,7 @@ const Listing = require("../../models/listing");
 const ExpressError = require("../../utils/ExpressError");
 const mongoose = require("mongoose");
 
-// ✅ Mock all external dependencies
+// Mock all external dependencies
 jest.mock("../../models/listing");
 jest.mock("@mapbox/mapbox-sdk/services/geocoding", () => () => ({
   forwardGeocode: () => ({
@@ -32,21 +32,89 @@ const mockRes = () => {
 // ─── index ─────────────────────────────────────────────────────────────────────
 
 describe("listingController.index", () => {
-  it("should render index with all listings", async () => {
-    const req = mockReq();
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should render listings for the first page", async () => {
+    const req = mockReq({ query: {} });
     const res = mockRes();
+
     const fakeListings = [
       { title: "Beach House" },
       { title: "Mountain Cabin" },
     ];
 
-    Listing.find.mockResolvedValue(fakeListings);
+    const query = {
+      skip: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockResolvedValue(fakeListings),
+    };
+
+    Listing.find.mockReturnValue(query);
+    Listing.countDocuments.mockResolvedValue(2);
 
     await listingController.index(req, res);
 
     expect(Listing.find).toHaveBeenCalledWith({});
+    expect(query.skip).toHaveBeenCalledWith(0);
+    expect(query.limit).toHaveBeenCalledWith(9);
+    expect(Listing.countDocuments).toHaveBeenCalledWith({});
+
     expect(res.render).toHaveBeenCalledWith("listings/index.ejs", {
       allListings: fakeListings,
+      currentPage: 1,
+      totalPages: 1,
+    });
+  });
+
+  it("should fetch the second page", async () => {
+    const req = mockReq({ query: { page: "2" } });
+    const res = mockRes();
+
+    const fakeListings = [{ title: "Mountain Cabin" }];
+
+    const query = {
+      skip: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockResolvedValue(fakeListings),
+    };
+
+    Listing.find.mockReturnValue(query);
+    Listing.countDocuments.mockResolvedValue(11);
+
+    await listingController.index(req, res);
+
+    expect(query.skip).toHaveBeenCalledWith(9);
+    expect(query.limit).toHaveBeenCalledWith(9);
+
+    expect(res.render).toHaveBeenCalledWith("listings/index.ejs", {
+      allListings: fakeListings,
+      currentPage: 2,
+      totalPages: 2,
+    });
+  });
+
+  it("should default to page 1 for an invalid page number", async () => {
+    const req = mockReq({ query: { page: "invalid" } });
+    const res = mockRes();
+
+    const fakeListings = [];
+
+    const query = {
+      skip: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockResolvedValue(fakeListings),
+    };
+
+    Listing.find.mockReturnValue(query);
+    Listing.countDocuments.mockResolvedValue(0);
+
+    await listingController.index(req, res);
+
+    expect(query.skip).toHaveBeenCalledWith(0);
+
+    expect(res.render).toHaveBeenCalledWith("listings/index.ejs", {
+      allListings: fakeListings,
+      currentPage: 1,
+      totalPages: 0,
     });
   });
 });

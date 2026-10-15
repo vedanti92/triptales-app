@@ -57,6 +57,26 @@
     text-decoration: none;
     color: black;
   }
+
+  .pagination .page-link {
+    color: black;
+  }
+
+  .pagination .page-item.active .page-link {
+    background-color: #fe424d;
+    border-color: #fe424d;
+    color: white;
+  }
+
+  .pagination .page-link:hover {
+    color: #fe424d;
+    background-color: #ffe5e7;
+    border-color: #fe424d;
+  }
+
+  .pagination .page-link:focus {
+    box-shadow: 0 0 0 0.2rem rgba(254, 66, 77, 0.25);
+  }
 </style>
 
 <div class="buttons">
@@ -143,6 +163,49 @@
   </a>
   <% } %>
 </div>
+
+<% if (totalPages > 1) { %>
+  <nav aria-label="Listings pagination" class="mt-4 mb-4">
+    <ul class="pagination justify-content-center">
+
+      <!-- Previous -->
+      <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+        <% if (currentPage > 1) { %>
+          <a class="page-link" href="/listings?page=<%= currentPage - 1 %>">
+            Previous
+          </a>
+        <% } else { %>
+          <span class="page-link">Previous</span>
+        <% } %>
+      </li>
+
+      <!-- Page numbers -->
+      <% for (let page = 1; page <= totalPages; page++) { %>
+        <li class="page-item <%= page === currentPage ? 'active' : '' %>">
+          <a
+            class="page-link"
+            href="/listings?page=<%= page %>"
+            <%= page === currentPage ? 'aria-current="page"' : '' %>
+          >
+            <%= page %>
+          </a>
+        </li>
+      <% } %>
+
+      <!-- Next -->
+      <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+        <% if (currentPage < totalPages) { %>
+          <a class="page-link" href="/listings?page=<%= currentPage + 1 %>">
+            Next
+          </a>
+        <% } else { %>
+          <span class="page-link">Next</span>
+        <% } %>
+      </li>
+
+    </ul>
+  </nav>
+<% } %>
 
 <script>
   let taxSwitch = document.getElementById("flexSwitchCheckDefault");

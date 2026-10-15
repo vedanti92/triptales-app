@@ -30,7 +30,8 @@ main()
     });
   })
   .catch((err) => {
-    console.log(err);
+    console.error("Failed to connect to database:", err);
+    process.exit(1);
   });
 
 async function main() {
@@ -60,11 +61,12 @@ const sessionOptions = {
   store,
   secret: process.env.SECRET,
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   cookie: {
-    expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
   },
 };
 
@@ -98,13 +100,25 @@ app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/", userRouter);
 
-app.get("/search", async (req, res) => {
-  const query = req.query.query;
+app.get(
+  "/search",
+  wrapAsync(async (req, res) => {
+    const rawQuery = req.query.query;
+    const query = typeof rawQuery === "string" ? rawQuery.trim() : "";
 
-  let results = await Listing.find({ title: { $regex: query, $options: "i" } });
+    let results = [];
 
-  res.render("listings/result.ejs", { query, results });
-});
+    if (query && query.length <= 100) {
+      const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+      results = await Listing.find({
+        title: { $regex: escapedQuery, $options: "i" },
+      });
+    }
+
+    res.render("listings/result.ejs", { query, results });
+  }),
+);
 
 app.get(
   "/listings/category/:category",
@@ -113,7 +127,7 @@ app.get(
     const listings = await Listing.find({ category: category });
 
     res.render("listings/filters.ejs", { listings, category });
-  })
+  }),
 );
 
 // middleware
@@ -123,6 +137,15 @@ app.all("*", (req, res, next) => {
 
 app.use((err, req, res, next) => {
   let { statusCode = 500, message = "Something went wrong!" } = err;
+
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  if (statusCode < 400 || statusCode > 599) {
+    statusCode = 500;
+    message = "Something went wrong!";
+  }
+
   res.status(statusCode).render("error.ejs", { message });
-  // res.status(statusCode).send(message);
 });

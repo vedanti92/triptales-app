@@ -6,8 +6,27 @@ const ExpressError = require("../utils/ExpressError.js");
 const mongoose = require("mongoose");
 
 module.exports.index = async (req, res) => {
-  const allListings = await Listing.find({});
-  res.render("listings/index.ejs", { allListings });
+  const requestedPage = Math.max(1, parseInt(req.query.page, 10) || 1);
+  const limit = 9;
+
+  const totalListings = await Listing.countDocuments({});
+  const totalPages = Math.ceil(totalListings / limit);
+
+  // Redirect requests beyond the last page.
+  if (totalPages > 0 && requestedPage > totalPages) {
+    return res.redirect(`/listings?page=${totalPages}`);
+  }
+
+  const currentPage = requestedPage;
+  const skip = (currentPage - 1) * limit;
+
+  const allListings = await Listing.find({}).skip(skip).limit(limit);
+
+  res.render("listings/index.ejs", {
+    allListings,
+    currentPage,
+    totalPages,
+  });
 };
 
 module.exports.renderNewForm = (req, res) => {
@@ -102,6 +121,10 @@ module.exports.updateListing = async (req, res) => {
     { new: true },
   );
 
+  if (!listing) {
+    throw new ExpressError(404, "Listing not found!");
+  }
+
   if (typeof req.file !== "undefined") {
     let url = req.file.path;
     let filename = req.file.filename;
@@ -120,7 +143,11 @@ module.exports.destroyListing = async (req, res) => {
     throw new ExpressError(400, "Invalid ID!");
   }
 
-  await Listing.findByIdAndDelete(id);
+  const listing = await Listing.findByIdAndDelete(id);
+  if (!listing) {
+    throw new ExpressError(404, "Listing not found!");
+  }
+
   req.flash("success", "Listing Deleted!");
   res.redirect("/listings");
 };
